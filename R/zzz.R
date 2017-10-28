@@ -1,5 +1,8 @@
 ##
 .onLoad <- function(libname, pkgname)
 {
-  RProtoBuf::readProtoFiles(package="tRainspotting")
+  f <- system.file("proto", package="tRainspotting")
+  RProtoBuf::readProtoFiles(dir=f)
+  options(tRainspotting=list())
 }
+
