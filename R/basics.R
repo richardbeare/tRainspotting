@@ -12,17 +12,15 @@ NULL
 #'
 #' @export
 #'
-register_nsw <- function(key)
-{
+register_nsw <- function(key) {
   # current options
   O <- getOption("tRainspotting")
   O$opendata_nsw <- key
-  options(tRainspotting=O)
+  options(tRainspotting = O)
   invisible(NULL)
 }
 
-get_nsw_apikey <- function()
-{
+get_nsw_apikey <- function() {
   O <- getOption("tRainspotting")
   if (is.null(O$opendata_nsw)) {
     stop("No API key registered for nsw transport")
@@ -40,13 +38,19 @@ get_nsw_apikey <- function()
 #' load. The result can be used to query trip updates as well as extract positions
 #' @return RProtoBuf message
 #' @export
-nswVehicles <- function(vehicle_type=c("ferries", "sydneytrains")) {
+nswVehicles <- function(vehicle_type = c("ferries",
+                                         "sydneytrains",
+                                         "buses",
+                                         "lightrail",
+                                         "nswtrains")) {
   apikey <- get_nsw_apikey()
   vehicle_type <- match.arg(vehicle_type)
   URL <- "https://api.transport.nsw.gov.au/v1/gtfs/vehiclepos/"
   URL <- paste0(URL, vehicle_type)
 
-  data <- httr::GET(URL, add_headers( Authorization=paste("apikey", apikey)))
+  data <- httr::GET(URL,
+                    httr::add_headers(
+                      Authorization = paste("apikey", apikey)))
   check_url_status(data)
   ## do the protobuf stuff
   buffer <- transit_realtime.FeedMessage$read(data$content)
@@ -82,7 +86,7 @@ getPosition <- function(M) {
     row <- c(as.list(G$vehicle$trip),
              as.list(G$vehicle$vehicle),
              as.list(G$vehicle$position))
-    row <- as.data.frame(row, stringsAsFactors=FALSE)
+    row <- as.data.frame(row, stringsAsFactors = FALSE)
     return(row)
   })
   extracted <- do.call(rbind, extracted)
@@ -131,21 +135,26 @@ return(m)
 #' @description Ferries have multiple entries in the live position feed. There is
 #' a note about this on the FAQ. This function filters out the most recent entry
 #' by pulling apart the trip_id column.
-#' @param posDF a data frame created by getPositions
+#' @param pos_DF a data frame created by getPositions
 #'
 #' @return a data frame with one row per vehicle
 #' @export
 #'
 #' @examples
-cleanFerries <- function(posDF) {
-  posDF <- mutate(as_tibble(posDF),
-                  tripidLab = gsub("^([[:alpha:]]+)[[:digit:]]+-[[:digit:]]+$", "\\1", trip_id),
-                  tripidA = as.numeric(gsub("^[[:alpha:]]+([[:digit:]]+)-[[:digit:]]+$", "\\1", trip_id)),
-                  tripidB = as.numeric(gsub("^[[:alpha:]]+[[:digit:]]+-([[:digit:]]+)$", "\\1", trip_id))
+cleanFerries <- function(pos_DF) {
+  pos_DF <- mutate(
+    as_tibble(pos_DF),
+    tripidLab = gsub("^([[:alpha:]]+)[[:digit:]]+-[[:digit:]]+$",
+                     "\\1", trip_id),
+    tripidA = as.numeric(gsub("^[[:alpha:]]+([[:digit:]]+)-[[:digit:]]+$",
+                              "\\1", trip_id)),
+    tripidB = as.numeric(gsub("^[[:alpha:]]+[[:digit:]]+-([[:digit:]]+)$",
+                              "\\1", trip_id))
   )
-  posbyvehicle <- nest(posDF, -id)
-  posbyvehicle <- mutate(posbyvehicle, data=map(data, ~arrange(.x, desc(tripidA))),
-                         data=map(data, ~.x[1,]))
+  posbyvehicle <- nest(pos_DF, -id) # nolint
+  posbyvehicle <- mutate(posbyvehicle,
+                         data = map(data, ~arrange(.x, desc(tripidA))), # nolint
+                         data = map(data, ~.x[1, ]))
   posbyvehicle <- unnest(posbyvehicle)
   return(posbyvehicle)
 }
