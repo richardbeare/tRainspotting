@@ -4,6 +4,7 @@ Title: Public transport vehicle locations
 Description: Retrieves vehicle locations from gtfs-realtime feeds
 Authors@R: person("Richard", "Beare", email = "Richard.Beare@gmail.com", role = c("aut", "cre"))
 Imports: RProtoBuf, httr
+Suggests: shiny
 License: GPL?
 Encoding: UTF-8
 LazyData: true
