@@ -20,3 +20,9 @@ A simple demo using leaflet and shiny to display ferry positions, names and trac
 library(tRainspotting)
 demo("sydneyFerries")
 ```
+
+Contributions welcome, with the following needing attention:
+1. Clean up the shiny example - needs someone who knows about reactive programming.
+1. More artistic display, possibly with little boat icons (the RUnconference icon package?)
+1. Trains and buses...
+
