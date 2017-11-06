@@ -4,10 +4,10 @@
 \alias{cleanFerries}
 \title{Retrieve latest ferry position}
 \usage{
-cleanFerries(posDF)
+cleanFerries(pos_DF)
 }
 \arguments{
-\item{posDF}{a data frame created by getPositions}
+\item{pos_DF}{a data frame created by getPositions}
 }
 \value{
 a data frame with one row per vehicle

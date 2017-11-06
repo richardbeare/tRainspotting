@@ -1,7 +1,8 @@
 #' @importFrom httr GET
 #' @importFrom RProtoBuf readProtoFiles
-#' @importFrom dplyr mutate group_by summarize
+#' @importFrom dplyr mutate group_by summarize arrange
 #' @importFrom tidyr nest unnest
+#' @importFrom purrr map
 NULL
 
 
@@ -143,7 +144,7 @@ return(m)
 #' @examples
 cleanFerries <- function(pos_DF) {
   pos_DF <- mutate(
-    as_tibble(pos_DF),
+    pos_DF,
     tripidLab = gsub("^([[:alpha:]]+)[[:digit:]]+-[[:digit:]]+$",
                      "\\1", trip_id),
     tripidA = as.numeric(gsub("^[[:alpha:]]+([[:digit:]]+)-[[:digit:]]+$",
@@ -153,8 +154,35 @@ cleanFerries <- function(pos_DF) {
   )
   posbyvehicle <- nest(pos_DF, -id) # nolint
   posbyvehicle <- mutate(posbyvehicle,
-                         data = map(data, ~arrange(.x, desc(tripidA))), # nolint
-                         data = map(data, ~.x[1, ]))
+                         data = purrr::map(data, ~dplyr::arrange(.x, dplyr::desc(tripidA))), # nolint
+                         data = purrr::map(data, ~.x[1, ]))
   posbyvehicle <- unnest(posbyvehicle)
   return(posbyvehicle)
+}
+
+
+#' Fetch static gtfs route data from NSW transport.
+#' @description GTFS data comes as a large zip file and can
+#' be used to display all sorts of routes and stops. This function
+#' downloads this data from the NSW transport site. The folder can
+#' then be passed to the functions from the gtfsr package. The gtfsr
+#' package can't be used directly because the transitfeed site doesn't
+#' carry the NSW data anymore.
+#' @return folder name containing the download
+#' @export
+#'
+#' @examples
+fetchNSWRoutes <- function() {
+  apikey <- get_nsw_apikey()
+  URL <- "https://api.transport.nsw.gov.au/v1/publictransport/timetables/complete/gtfs"
+  td <- tempfile(fileext=".zip")
+
+  data <- httr::GET(URL,
+                    httr::add_headers(
+                      Accept = "application/zip",
+                      Authorization = paste("apikey", apikey)), httr::write_disk(td), httr::progress())
+  check_url_status(data)
+  zipoutdir <- file.path(tempdir(), "nsw_gtfs")
+  unzip(td, exdir=zipoutdir)
+  return(zipoutdir)
 }

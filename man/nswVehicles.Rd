@@ -4,7 +4,8 @@
 \alias{nswVehicles}
 \title{Vehicle positions for NSW.}
 \usage{
-nswVehicles(vehicle_type = c("ferries", "sydneytrains"))
+nswVehicles(vehicle_type = c("ferries", "sydneytrains", "buses", "lightrail",
+  "nswtrains"))
 }
 \value{
 RProtoBuf message
