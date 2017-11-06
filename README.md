@@ -16,5 +16,7 @@ The aim is to experiment with updating leaflet maps with live position data.
 
 A simple demo using leaflet and shiny to display ferry positions, names and tracks is included:
 
-
-
+``` r
+library(tRainspotting)
+demo("sydneyFerries")
+```

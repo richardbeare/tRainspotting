@@ -167,7 +167,8 @@ cleanFerries <- function(pos_DF) {
 #' downloads this data from the NSW transport site. The folder can
 #' then be passed to the functions from the gtfsr package. The gtfsr
 #' package can't be used directly because the transitfeed site doesn't
-#' carry the NSW data anymore.
+#' carry the NSW data anymore. Using the gtfsr functions to process the
+#' results of this requires a modified version - pull request submitted.
 #' @return folder name containing the download
 #' @export
 #'
